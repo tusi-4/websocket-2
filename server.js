@@ -1,4 +1,5 @@
 const express = require('express');
+const socket = require('socket.io');
 
 const app = express();
 const server = app.listen(process.env.PORT || 8000, () => {
@@ -8,7 +9,6 @@ const io = socket(server);
 
 const tasks = [];
 
-// jako callback nasluchiwacza ustaw funkcje emitujaca tylko do tego nowego uzytkownika zdarzenie updateData + tasks
 io.on('connection', (socket) => {
   socket.emit('updateData', tasks);
 

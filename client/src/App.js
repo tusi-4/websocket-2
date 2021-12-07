@@ -1,6 +1,40 @@
 import React from 'react';
+import io from 'socket.io';
 
 class App extends React.Component {
+  state = {
+    tasks: [],
+    taskName: '',
+  }
+
+  componentDidMount(){
+    this.socket = io();
+    this.socket.connect("http://localhost:8000");
+    this.socket.on('addTask', (task) => this.addTask(task));
+    this.socket.on('removeTask', (taskId) => this.removeTask(taskId));
+    this.socket.on('updateData', (tasks) => this.updateTasks(tasks));
+  }
+
+  addTask(task){
+    this.state.tasks.push(task);
+  }
+
+  removeTask(id){
+    let taskId = this.state.tasks.findIndex(id);
+    this.state.tasks.splice(taskId, 1);
+    this.socket.emit('removeTask', taskId);
+  }
+
+  submitForm(event){
+    event.preventDefault();
+    this.addTask(this.state.taskName);
+    this.socket.emit('addTask', this.state.taskName);
+  }
+
+  //nie rozumiem zadania
+  updateTasks(){
+
+  }
 
   render() {
     return (
@@ -13,12 +47,20 @@ class App extends React.Component {
           <h2>Tasks</h2>
 
           <ul className="tasks-section__list" id="tasks-list">
-            <li class="task">Shopping <button class="btn btn--red">Remove</button></li>
-            <li class="task">Go out with a dog <button class="btn btn--red">Remove</button></li>
+            {this.state.tasks.map(task => (
+              <li key={task.id} className="task">
+                {task.id}
+                <button className="btn btn--red" onClick={event => {
+                  event.preventDefault();
+                  this.removeTask(task.id);
+                }}>Remove</button>
+              </li>
+            ))}
           </ul>
 
-          <form id="add-task-form">
-            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" />
+          <form id="add-task-form" onSubmit={this.submitForm}>
+            {/* brakuje onChange inputu bo nie czaję treści zadania*/}
+            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" value={this.state.taskName} />
             <button className="btn" type="submit">Add</button>
           </form>
 
