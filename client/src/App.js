@@ -9,21 +9,26 @@ class App extends React.Component {
   }
 
   componentDidMount(){
-    this.socket = io();
-    this.socket.connect("http://localhost:8000");
-    this.socket.on('addTask', (task) => this.addTask(task));
-    this.socket.on('removeTask', (taskId) => this.removeTask(taskId));
-    this.socket.on('updateData', (tasks) => this.updateTasks(tasks));
+    this.socket = io('localhost:8000');
+    this.socket.on('addTask', (task) => {this.addTask(task)});
+    this.socket.on('removeTask', (id) => {this.removeTask(id)});
+    this.socket.on('updateData', (tasks) => {this.updateTasks(tasks)});
   }
 
   addTask(task){
-    this.state.tasks.push(task);
+    this.setState({
+      tasks: [
+      ...this.state.tasks,
+      task,
+    ]});    
   }
 
   removeTask(id){
-    let taskId = this.state.tasks.findIndex(id);
-    this.state.tasks.splice(taskId, 1);
-    this.socket.emit('removeTask', taskId);
+    this.setState({
+      // znalezione na stacku
+      tasks: this.state.tasks.filter(taskId => taskId.id !== id),
+    });
+    this.socket.emit('removeTask', id);
   }
 
   submitForm(event){
@@ -41,6 +46,7 @@ class App extends React.Component {
   }
 
   updateTaskName(event){
+    event.preventDefault();
     this.setState({
       taskName: event.target.value,
     });
@@ -68,8 +74,8 @@ class App extends React.Component {
             ))}
           </ul>
 
-          <form id="add-task-form" onSubmit={() => this.submitForm}>
-            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" /*zakomentowuje, bo nie moge wpisywac wartosci przy podanej value value={this.state.taskName}*/ onChange={() => this.updateTaskName} />
+          <form id="add-task-form" onSubmit={event => this.submitForm(event)}>
+            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" /*zakomentowuje, bo nie moge wpisywac wartosci przy podanej value value={this.state.taskName}*/ onChange={event => this.updateTaskName(event)} />
             <button className="btn" type="submit">Add</button>
           </form>
 
