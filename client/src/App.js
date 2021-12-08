@@ -1,5 +1,6 @@
 import React from 'react';
 import io from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 
 class App extends React.Component {
   state = {
@@ -27,12 +28,14 @@ class App extends React.Component {
 
   submitForm(event){
     event.preventDefault();
-    this.addTask(this.state.taskName);
-    this.socket.emit('addTask', this.state.taskName);
+    const task = {id: uuidv4(), name: this.state.taskName};
+    this.addTask(task);
+    this.socket.emit('addTask', task);
   }
 
   updateTasks(tasks){
     this.setState({
+      ...this.state.tasks, // ?
       tasks: tasks,
     });
   }
@@ -56,7 +59,7 @@ class App extends React.Component {
           <ul className="tasks-section__list" id="tasks-list">
             {this.state.tasks.map(task => (
               <li key={task.id} className="task">
-                {task.id}
+                {task.name}
                 <button className="btn btn--red" onClick={event => {
                   event.preventDefault();
                   this.removeTask(task.id);
@@ -65,8 +68,8 @@ class App extends React.Component {
             ))}
           </ul>
 
-          <form id="add-task-form" onSubmit={this.submitForm}>
-            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" value={this.state.taskName} onChange={this.updateTaskName} />
+          <form id="add-task-form" onSubmit={() => this.submitForm}>
+            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" /*zakomentowuje, bo nie moge wpisywac wartosci przy podanej value value={this.state.taskName}*/ onChange={() => this.updateTaskName} />
             <button className="btn" type="submit">Add</button>
           </form>
 
@@ -74,7 +77,6 @@ class App extends React.Component {
       </div>
     );
   };
-
 };
 
 export default App;
