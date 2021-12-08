@@ -1,5 +1,5 @@
 import React from 'react';
-import io from 'socket.io';
+import io from 'socket.io-client';
 
 class App extends React.Component {
   state = {
@@ -31,9 +31,16 @@ class App extends React.Component {
     this.socket.emit('addTask', this.state.taskName);
   }
 
-  //nie rozumiem zadania
-  updateTasks(){
+  updateTasks(tasks){
+    this.setState({
+      tasks: tasks,
+    });
+  }
 
+  updateTaskName(event){
+    this.setState({
+      taskName: event.target.value,
+    });
   }
 
   render() {
@@ -59,8 +66,7 @@ class App extends React.Component {
           </ul>
 
           <form id="add-task-form" onSubmit={this.submitForm}>
-            {/* brakuje onChange inputu bo nie czaję treści zadania*/}
-            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" value={this.state.taskName} />
+            <input className="text-input" autoComplete="off" type="text" placeholder="Type your description" id="task-name" value={this.state.taskName} onChange={this.updateTaskName} />
             <button className="btn" type="submit">Add</button>
           </form>
 
